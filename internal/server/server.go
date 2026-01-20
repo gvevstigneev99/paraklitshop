@@ -54,6 +54,7 @@ func (s *Server) registerRoutes() {
 	_ = orderHandler // to avoid unused variable error for now
 
 	s.app.Get("/health", handler.Health())
+	s.app.Post("/login", handler.Login)
 
 	//global middleware
 	s.app.Use(middleware.TimingMiddleware(s.logger))
@@ -65,8 +66,8 @@ func (s *Server) registerRoutes() {
 
 	//protected routes
 	protected := s.app.Group("/api")
+	protected.Use(middleware.JWTMiddleware())
 	protected.Post("/orders", orderHandler.CreateOrder)
-	protected.Use(middleware.JWTAuthMiddleware())
 	protected.Post("/cart/add/:productId/:qty", cartHandler.AddToCart)
 	protected.Get("/cart", cartHandler.ViewCart)
 	protected.Delete("/cart/clear", cartHandler.ClearCart)
@@ -74,6 +75,21 @@ func (s *Server) registerRoutes() {
 	protected.Get("/secret", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"msg": "you have access"})
 	})
+
+	// Для покупателя
+	buyer := protected.Group("/buyer")
+	buyer.Use(middleware.RoleMiddleware("buyer"))
+	buyer.Get("/cart", cartHandler.ViewCart)
+	buyer.Post("/cart/add", cartHandler.AddToCart)
+	buyer.Post("/orders", orderHandler.CreateOrder)
+
+	// Для продавца
+	seller := protected.Group("/seller")
+	seller.Use(middleware.RoleMiddleware("seller"))
+	seller.Get("/cart", cartHandler.ViewCart)
+	seller.Post("/cart/add", cartHandler.AddToCart)
+	seller.Post("/orders", orderHandler.CreateOrder)
+	seller.Get("/products", productHandler.List)
 }
 
 func (s *Server) Start() error {
