@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"paraklitshop/internal/config"
@@ -93,8 +94,11 @@ func (s *Server) registerRoutes() {
 }
 
 func (s *Server) Start() error {
-	s.logger.Info("starting server", slog.String("port", s.cfg.ServerPort))
-	return s.app.Listen(":" + s.cfg.ServerPort)
+	s.logger.Info(
+		"http server started",
+		"port", s.cfg.HTTP.Port,
+	)
+	return s.app.Listen(fmt.Sprintf(":%d", s.cfg.HTTP.Port))
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {

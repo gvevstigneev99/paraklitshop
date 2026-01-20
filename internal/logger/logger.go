@@ -1,20 +1,29 @@
 package logger
 
 import (
-	"log"
-
 	"golang.org/x/exp/slog"
+
+	"os"
 )
 
 func New(env string) *slog.Logger {
-	var level slog.Level
-	if env == "local" {
-		level = slog.LevelDebug
-	} else {
-		level = slog.LevelInfo
+	var handler slog.Handler
+
+	switch env {
+	case "local":
+		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		})
+	default:
+		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		})
 	}
-	handler := slog.NewTextHandler(log.Writer(), &slog.HandlerOptions{
-		Level: level,
-	})
-	return slog.New(handler)
+
+	logger := slog.New(handler)
+
+	// делаем его глобальным для стандартных вызовов slog.*
+	slog.SetDefault(logger)
+
+	return logger
 }

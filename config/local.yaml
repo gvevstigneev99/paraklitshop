@@ -1,0 +1,33 @@
+app:
+    name: shop
+    env: local
+
+http:
+    port: 8080
+    timeout: 5s
+
+postgres:
+    host: localhost
+    port: 5432
+    user: postgres
+    password: password
+    dbname: shop_db
+    sslmode: disable
+
+redis:
+    host: localhost
+    port: 6379
+    password: ""
+    db: 0
+
+jwt:
+    secret: secret123
+    ttl: 24h
+
+logging:
+    level: debug
+    port: 514
+    host: localhost 
+
+
+
