@@ -5,11 +5,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gvevstigneev99/myProject/internal/handler"
-	"github.com/gvevstigneev99/myProject/internal/middleware"
+	"github.com/gvevstigneev99/paraklitshop/internal/config"
+	"github.com/gvevstigneev99/paraklitshop/internal/handler"
+	"github.com/gvevstigneev99/paraklitshop/internal/middleware"
 	"golang.org/x/exp/slog"
-
-	"paraklitshop/internal/config"
 )
 
 type Server struct {

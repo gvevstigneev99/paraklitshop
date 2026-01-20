@@ -1,4 +1,4 @@
-module github.com/gvevstigneev99/myProject
+module github.com/gvevstigneev99/paraklitshop
 
 go 1.24.4
 

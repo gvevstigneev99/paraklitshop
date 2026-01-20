@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"time"
 
-	"D:\paraklitshop\internal\config\config.go"
-	"D:\paraklitshop\internal\logger\logger.go"
-	"D:\paraklitshop\internal\server\server.go"
+	"paraklitshop/internal/config"
+	"paraklitshop/internal/logger"
+	"paraklitshop/internal/server"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	l.Info("shutting down server...")
-	
+
 	// Создаем контекст с таймаутом для завершения работы сервера
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
