@@ -1,4 +1,4 @@
-module github.com/gvevstigneev99/paraklitshop
+module paraklitshop
 
 go 1.24.4
 

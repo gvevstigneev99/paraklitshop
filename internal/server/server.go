@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gvevstigneev99/paraklitshop/internal/config"
-	"github.com/gvevstigneev99/paraklitshop/internal/handler"
-	"github.com/gvevstigneev99/paraklitshop/internal/middleware"
+	"paraklitshop/internal/config"
+	"paraklitshop/internal/handler"
+	"paraklitshop/internal/middleware"
 	"golang.org/x/exp/slog"
 )
 

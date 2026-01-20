@@ -29,7 +29,8 @@ func main() {
 	// Запускаем сервер в отдельной горутине
 	go func() {
 		if err := srv.Start(); err != nil {
-			l.Fatalf("failed to start server: %v", err)
+			l.Error("failed to start server", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -43,7 +44,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		l.Fatalf("failed to shutdown server: %v", err)
+		l.Error("failed to shutdown server", "error", err)
+		os.Exit(1)
 	}
 	l.Info("server stopped gracefully")
 }
