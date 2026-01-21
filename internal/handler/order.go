@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"paraklitshop/internal/service"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type OrderHandler struct {
@@ -12,6 +13,16 @@ type OrderHandler struct {
 func NewOrderHandler(service *service.OrderService) *OrderHandler {
 	return &OrderHandler{service: service}
 }
+
+//CreateOrder godoc
+// @Summary Create a new order
+// @Description Create a new order based on the user's cart
+// @Tags orders
+// @Security BearerAuth
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /api/buyer/orders [post]
 
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 	userID := 1 // In real scenario, get from JWT or session

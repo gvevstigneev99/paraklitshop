@@ -12,6 +12,16 @@ import (
 	"paraklitshop/internal/server"
 )
 
+// @title Paraklit Shop API
+// @version 1.0
+// @description This is a backend API for Paraklit Shop.
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 
 	// Load configuration

@@ -13,7 +13,9 @@ import (
 	"paraklitshop/internal/service"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 	"golang.org/x/exp/slog"
+	_ "paraklitshop/docs"
 )
 
 type Server struct {
@@ -56,6 +58,7 @@ func (s *Server) registerRoutes() {
 
 	s.app.Get("/health", handler.Health())
 	s.app.Post("/login", handler.Login)
+	s.app.Get("/swagger/*", swagger.HandlerDefault) // default swagger UI
 
 	//global middleware
 	s.app.Use(middleware.TimingMiddleware(s.logger))
