@@ -29,8 +29,8 @@ jwt:
 auth:
     # Рекомендуется задавать через переменные окружения:
     # AUTH_BUYER_PASSWORD, AUTH_SELLER_PASSWORD
-    buyer_password: ""
-    seller_password: ""
+    buyer_password: ${AUTH_BUYER_PASSWORD}
+    seller_password: ${AUTH_SELLER_PASSWORD}
 
 logging:
     level: debug

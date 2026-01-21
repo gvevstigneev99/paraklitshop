@@ -14,6 +14,17 @@ func NewAuthHandler(s service.AuthService) *AuthHandler {
 	return &AuthHandler{authService: s}
 }
 
+// @Login godoc
+// @Summary Авторизация пользователя
+// @Description Выполняет аутентификацию пользователя и возвращает JWT токен
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body LoginRequest true "Login credentials"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req struct {
 		Username string `json:"username"`
