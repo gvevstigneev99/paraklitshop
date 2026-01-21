@@ -12,10 +12,11 @@ import (
 	"paraklitshop/internal/repository/redis"
 	"paraklitshop/internal/service"
 
+	_ "paraklitshop/docs"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"golang.org/x/exp/slog"
-	_ "paraklitshop/docs"
 )
 
 type Server struct {
@@ -87,14 +88,14 @@ func (s *Server) registerRoutes() {
 	buyer := protected.Group("/buyer")
 	buyer.Use(middleware.RoleMiddleware("buyer"))
 	buyer.Get("/cart", cartHandler.ViewCart)
-	buyer.Post("/cart/add", cartHandler.AddToCart)
+	buyer.Post("/cart/add/:productId/:qty", cartHandler.AddToCart)
 	buyer.Post("/orders", orderHandler.CreateOrder)
 
 	// Для продавца
 	seller := protected.Group("/seller")
 	seller.Use(middleware.RoleMiddleware("seller"))
 	seller.Get("/cart", cartHandler.ViewCart)
-	seller.Post("/cart/add", cartHandler.AddToCart)
+	seller.Post("/cart/add/:productId/:qty", cartHandler.AddToCart)
 	seller.Post("/orders", orderHandler.CreateOrder)
 	seller.Get("/products", productHandler.List)
 }
