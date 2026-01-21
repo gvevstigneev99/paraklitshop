@@ -1,25 +1,31 @@
 package handler
 
 import (
-	"paraklitshop/internal/auth"
+	"paraklitshop/internal/service"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func Login(c *fiber.Ctx) error {
-	type LoginRequest struct {
-		UserID int    `json:"user_id"`
-		Role   string `json:"role"`
-	}
+type AuthHandler struct {
+	authService service.AuthService
+}
 
-	var req LoginRequest
+func NewAuthHandler(s service.AuthService) *AuthHandler {
+	return &AuthHandler{authService: s}
+}
+
+func (h *AuthHandler) Login(c *fiber.Ctx) error {
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
-	token, err := auth.GenerateToken(req.UserID, req.Role)
+	token, err := h.authService.Login(c.Context(), req.Username, req.Password)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(fiber.Map{"token": token})
 }

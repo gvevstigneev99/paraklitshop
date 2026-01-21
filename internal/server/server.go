@@ -57,7 +57,10 @@ func (s *Server) registerRoutes() {
 	_ = orderHandler // to avoid unused variable error for now
 
 	s.app.Get("/health", handler.Health())
-	s.app.Post("/login", handler.Login)
+
+	authService := service.NewAuthService(s.cfg.JWT.Secret, s.cfg.JWT.TTL, s.cfg.Auth.BuyerPassword, s.cfg.Auth.SellerPassword)
+	authHandler := handler.NewAuthHandler(authService)
+	s.app.Post("/login", authHandler.Login)
 	s.app.Get("/swagger/*", swagger.HandlerDefault) // default swagger UI
 
 	//global middleware
@@ -70,7 +73,7 @@ func (s *Server) registerRoutes() {
 
 	//protected routes
 	protected := s.app.Group("/api")
-	protected.Use(middleware.JWTMiddleware())
+	protected.Use(middleware.JWTMiddleware(s.cfg.JWT.Secret))
 	protected.Post("/orders", orderHandler.CreateOrder)
 	protected.Post("/cart/add/:productId/:qty", cartHandler.AddToCart)
 	protected.Get("/cart", cartHandler.ViewCart)

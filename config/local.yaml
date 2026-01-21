@@ -3,6 +3,7 @@ app:
     env: local
 
 http:
+    host: 0.0.0.0
     port: 8080
     timeout: 5s
 
@@ -10,7 +11,7 @@ postgres:
     host: localhost
     port: 5432
     user: postgres
-    password: password
+    password: ""
     dbname: shop_db
     sslmode: disable
 
@@ -21,8 +22,15 @@ redis:
     db: 0
 
 jwt:
-    secret: secret123
+    # Рекомендуется задавать через переменные окружения: JWT_SECRET, JWT_TTL
+    secret: ""
     ttl: 24h
+
+auth:
+    # Рекомендуется задавать через переменные окружения:
+    # AUTH_BUYER_PASSWORD, AUTH_SELLER_PASSWORD
+    buyer_password: ""
+    seller_password: ""
 
 logging:
     level: debug

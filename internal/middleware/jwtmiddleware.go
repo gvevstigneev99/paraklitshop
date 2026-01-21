@@ -7,14 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func JWTMiddleware() fiber.Handler {
+func JWTMiddleware(secret string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing authorization header"})
 		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		claims, err := auth.ParseToken(tokenString)
+		claims, err := auth.ParseToken(tokenString, secret)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid or expired token"})
 		}

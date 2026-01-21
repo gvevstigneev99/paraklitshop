@@ -15,8 +15,17 @@ func NewCartHandler(service *service.CartService) *CartHandler {
 	return &CartHandler{service: service}
 }
 
+func userIDFromLocals(c *fiber.Ctx) (int, bool) {
+	v := c.Locals("userID")
+	userID, ok := v.(int)
+	return userID, ok
+}
+
 func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
-	userID := 1 // In real scenario, get from JWT or session
+	userID, ok := userIDFromLocals(c)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
 	productID, err := strconv.Atoi(c.Params("productId"))
 	if err != nil {
 		return err
@@ -33,7 +42,10 @@ func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
 }
 
 func (h *CartHandler) ViewCart(c *fiber.Ctx) error {
-	userID := 1 // In real scenario, get from JWT or session
+	userID, ok := userIDFromLocals(c)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
 	cart, err := h.service.GetCart(userID)
 	if err != nil {
 		return err
@@ -42,7 +54,10 @@ func (h *CartHandler) ViewCart(c *fiber.Ctx) error {
 }
 
 func (h *CartHandler) ClearCart(c *fiber.Ctx) error {
-	userID := 1 // In real scenario, get from JWT or session
+	userID, ok := userIDFromLocals(c)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
 	err := h.service.ClearCart(userID)
 	if err != nil {
 		return err
@@ -51,7 +66,10 @@ func (h *CartHandler) ClearCart(c *fiber.Ctx) error {
 }
 
 func (h *CartHandler) RemoveFromCart(c *fiber.Ctx) error {
-	userID := 1 // In real scenario, get from JWT or session
+	userID, ok := userIDFromLocals(c)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
 	productID, err := strconv.Atoi(c.Params("productId"))
 	if err != nil {
 		return err

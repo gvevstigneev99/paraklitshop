@@ -25,7 +25,11 @@ func NewOrderHandler(service *service.OrderService) *OrderHandler {
 // @Router /api/buyer/orders [post]
 
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
-	userID := 1 // In real scenario, get from JWT or session
+	userIDLocal := c.Locals("userID")
+	userID, ok := userIDLocal.(int)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
 	if err := h.service.CreateOrder(userID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to place order"})
 	}
