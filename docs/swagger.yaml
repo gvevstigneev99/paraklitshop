@@ -26,6 +26,111 @@ info:
   title: Paraklit Shop API
   version: "1.0"
 paths:
+  /api/buyer/orders:
+    post:
+      description: Create a new order based on the user's cart
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new order
+      tags:
+      - orders
+  /cart:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает содержимое корзины пользователя
+      produces:
+      - application/json
+      responses: {}
+      summary: Просмотр корзины
+      tags:
+      - cart
+  /cart/add/{productId}:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет указанный товар в корзину пользователя
+      parameters:
+      - description: ID товара
+        in: path
+        name: productId
+        required: true
+        type: integer
+      - description: Количество
+        in: path
+        name: qty
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Добавить товар в корзину
+      tags:
+      - cart
+  /cart/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет все товары из корзины пользователя
+      produces:
+      - application/json
+      responses: {}
+      summary: Очистить корзину
+      tags:
+      - cart
+  /cart/remove/{productId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет указанный товар из корзины пользователя
+      parameters:
+      - description: ID товара
+        in: path
+        name: productId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Удалить товар из корзины
+      tags:
+      - cart
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает статус здоровья сервиса
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Проверка состояния сервиса
+      tags:
+      - health
   /login:
     post:
       consumes:
@@ -56,6 +161,17 @@ paths:
       summary: Авторизация пользователя
       tags:
       - auth
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all products available in the store
+      produces:
+      - application/json
+      responses: {}
+      summary: Выводит список всех продуктов
+      tags:
+      - products
 securityDefinitions:
   BearerAuth:
     in: header

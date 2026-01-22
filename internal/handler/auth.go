@@ -16,7 +16,7 @@ func NewAuthHandler(s service.AuthService) *AuthHandler {
 
 // @Login godoc
 // @Summary Авторизация пользователя
-// @Description Выполняет аутентификацию пользователя и возвращает JWT токен
+// @Description Проверяет учетные данные пользователя и возвращает JWT токен при успешной аутентификации.
 // @Tags auth
 // @Accept json
 // @Produce json

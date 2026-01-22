@@ -8,6 +8,7 @@ import (
 	"paraklitshop/internal/config"
 	"paraklitshop/internal/handler"
 	"paraklitshop/internal/middleware"
+	"paraklitshop/internal/repository"
 	"paraklitshop/internal/repository/postgres"
 	"paraklitshop/internal/repository/redis"
 	"paraklitshop/internal/service"
@@ -16,6 +17,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"golang.org/x/exp/slog"
 )
 
@@ -40,11 +43,30 @@ func NewServer(cfg *config.Config, logger *slog.Logger) *Server {
 }
 
 func (s *Server) registerRoutes() {
+	// Подключение к БД
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		s.cfg.Postgres.Host,
+		s.cfg.Postgres.Port,
+		s.cfg.Postgres.User,
+		s.cfg.Postgres.Password,
+		s.cfg.Postgres.DBName,
+		s.cfg.Postgres.SSLMode,
+	)
+	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		s.logger.Error("failed to connect to postgres", slog.Any("error", err))
+		// В учебном режиме продолжаем работу без БД
+	}
 
+	var userRepository repository.UserRepository
+	if db != nil {
+		userRepository = postgres.NewUserRepository(db)
+	}
 	cartRepository := redis.NewCartRepository()
 	_ = cartRepository // to avoid unused variable error for now
 	productRepository := postgres.NewProductRepository()
 	_ = productRepository // to avoid unused variable error for now
+
 	//public routes
 	cartService := service.NewCartService(cartRepository, productRepository)
 	_ = cartService // to avoid unused variable error for now
@@ -59,7 +81,7 @@ func (s *Server) registerRoutes() {
 
 	s.app.Get("/health", handler.Health())
 
-	authService := service.NewAuthService(s.cfg.JWT.Secret, s.cfg.JWT.TTL, s.cfg.Auth.BuyerPassword, s.cfg.Auth.SellerPassword)
+	authService := service.NewAuthService(userRepository, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
 	authHandler := handler.NewAuthHandler(authService)
 	s.app.Post("/login", authHandler.Login)
 	s.app.Get("/swagger/*", swagger.HandlerDefault) // default swagger UI

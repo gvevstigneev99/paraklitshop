@@ -21,6 +21,16 @@ func userIDFromLocals(c *fiber.Ctx) (int, bool) {
 	return userID, ok
 }
 
+// AddToCart godoc
+// @Summary Добавить товар в корзину
+// @Description Добавляет указанный товар в корзину пользователя
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Param productId path int true "ID товара"
+// @Param qty path int true "Количество"
+// @Security     BearerAuth
+// @Router /cart/add/{productId} [post]
 func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
 	userID, ok := userIDFromLocals(c)
 	if !ok {
@@ -41,6 +51,14 @@ func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Item added to cart"})
 }
 
+// ViewCart godoc
+// @Summary Просмотр корзины
+// @Description Возвращает содержимое корзины пользователя
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Security     BearerAuth
+// @Router /cart [get]
 func (h *CartHandler) ViewCart(c *fiber.Ctx) error {
 	userID, ok := userIDFromLocals(c)
 	if !ok {
@@ -53,6 +71,14 @@ func (h *CartHandler) ViewCart(c *fiber.Ctx) error {
 	return c.JSON(cart)
 }
 
+// ClearCart godoc
+// @Summary Очистить корзину
+// @Description Удаляет все товары из корзины пользователя
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Security     BearerAuth
+// @Router /cart/clear [delete]
 func (h *CartHandler) ClearCart(c *fiber.Ctx) error {
 	userID, ok := userIDFromLocals(c)
 	if !ok {
@@ -65,6 +91,15 @@ func (h *CartHandler) ClearCart(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Cart cleared"})
 }
 
+// RemoveFromCart godoc
+// @Summary Удалить товар из корзины
+// @Description Удаляет указанный товар из корзины пользователя
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Param productId path int true "ID товара"
+// @Security     BearerAuth
+// @Router /cart/remove/{productId} [delete]
 func (h *CartHandler) RemoveFromCart(c *fiber.Ctx) error {
 	userID, ok := userIDFromLocals(c)
 	if !ok {

@@ -14,7 +14,7 @@ func NewOrderHandler(service *service.OrderService) *OrderHandler {
 	return &OrderHandler{service: service}
 }
 
-//CreateOrder godoc
+// CreateOrder godoc
 // @Summary Create a new order
 // @Description Create a new order based on the user's cart
 // @Tags orders
@@ -22,8 +22,8 @@ func NewOrderHandler(service *service.OrderService) *OrderHandler {
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Security     BearerAuth
 // @Router /api/buyer/orders [post]
-
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 	userIDLocal := c.Locals("userID")
 	userID, ok := userIDLocal.(int)

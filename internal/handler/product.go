@@ -14,6 +14,13 @@ func NewProductHandler(service *service.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
+// List godoc
+// @Summary Выводит список всех продуктов
+// @Description Retrieve a list of all products available in the store
+// @Tags products
+// @Accept json
+// @Produce json
+// @Router /products [get]
 func (h *ProductHandler) List(c *fiber.Ctx) error {
 	products, err := h.service.GetAllProducts()
 	if err != nil {
