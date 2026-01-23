@@ -64,11 +64,12 @@ func (s *authService) Register(ctx context.Context, email, password, role string
 		return 0, errors.New("invalid role")
 	}
 	existing, err := s.userRepository.GetByEmail(ctx, email)
-	if err != nil {
-		return 0, err
-	}
-	if existing != nil {
+	if err == nil && existing != nil {
 		return 0, errors.New("user already exists")
+	}
+	// If error is ErrUserNotFound, continue with registration
+	if err != nil && err != repository.ErrUserNotFound {
+		return 0, err
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -78,5 +79,6 @@ func (s *authService) Register(ctx context.Context, email, password, role string
 		Email:        email,
 		PasswordHash: string(hashedPassword),
 		Role:         role,
+		CreatedAt:    time.Now(),
 	})
 }

@@ -3,18 +3,17 @@ package service
 import (
 	"errors"
 	"paraklitshop/internal/model"
-	"paraklitshop/internal/repository/postgres"
-	"paraklitshop/internal/repository/redis"
+	"paraklitshop/internal/repository"
 	"time"
 )
 
 type OrderService struct {
-	orderRepo   *postgres.OrderRepository
-	cartRepo    *redis.CartRepository
-	productRepo *postgres.ProductRepository
+	orderRepo   repository.OrderRepository
+	cartRepo    repository.CartRepository
+	productRepo repository.ProductRepository
 }
 
-func NewOrderService(orderRepo *postgres.OrderRepository, cartRepo *redis.CartRepository, productRepo *postgres.ProductRepository) *OrderService {
+func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.CartRepository, productRepo repository.ProductRepository) *OrderService {
 	return &OrderService{
 		orderRepo:   orderRepo,
 		cartRepo:    cartRepo,
@@ -23,7 +22,7 @@ func NewOrderService(orderRepo *postgres.OrderRepository, cartRepo *redis.CartRe
 }
 
 func (s *OrderService) CreateOrder(userID int) error {
-	cartItems, err := s.cartRepo.GetCart(userID)
+	cartItems, err := s.cartRepo.Get(userID)
 	if err != nil {
 		return err
 	}
@@ -52,20 +51,22 @@ func (s *OrderService) CreateOrder(userID int) error {
 		}
 	}
 
+	now := time.Now()
 	order := model.Order{
 		ID:         0,
 		UserID:     userID,
 		TotalPrice: totalAmount,
 		Status:     "paid",
-		CreatedAt:  time.Now(),
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}
 
-	err = s.orderRepo.CreateOrder(order)
+	err = s.orderRepo.Create(&order)
 	if err != nil {
 		return err
 	}
 
-	err = s.cartRepo.ClearCart(userID)
+	err = s.cartRepo.Clear(userID)
 	if err != nil {
 		return err
 	}

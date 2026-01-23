@@ -28,6 +28,13 @@ type Server struct {
 	logger *slog.Logger
 }
 
+type Dependencies struct {
+	UserRepository    repository.UserRepository
+	CartRepository    repository.CartRepository
+	ProductRepository repository.ProductRepository
+	OrderRepository   repository.OrderRepository
+}
+
 func NewServer(cfg *config.Config, logger *slog.Logger) *Server {
 	app := fiber.New(fiber.Config{
 		ReadTimeout:  5 * time.Second,
@@ -38,13 +45,17 @@ func NewServer(cfg *config.Config, logger *slog.Logger) *Server {
 		cfg:    cfg,
 		logger: logger,
 	}
-	s.registerRoutes()
+
+	//global middleware
+	s.app.Use(middleware.TimingMiddleware(s.logger))
+	s.app.Use(middleware.LoggingMiddleware(s.logger))
+
 	return s
 }
 
-func (s *Server) registerRoutes() {
-	// Подключение к БД
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+func (s *Server) SetupDependencies() (Dependencies, error) {
+	// Postgres connection
+	pgDSN := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		s.cfg.Postgres.Host,
 		s.cfg.Postgres.Port,
 		s.cfg.Postgres.User,
@@ -52,51 +63,51 @@ func (s *Server) registerRoutes() {
 		s.cfg.Postgres.DBName,
 		s.cfg.Postgres.SSLMode,
 	)
-	db, err := sqlx.Connect("postgres", dsn)
+	db, err := sqlx.Connect("postgres", pgDSN)
 	if err != nil {
 		s.logger.Error("failed to connect to postgres", slog.Any("error", err))
-		// В учебном режиме продолжаем работу без БД
+		return Dependencies{}, err
 	}
 
-	var userRepository repository.UserRepository
-	if db != nil {
-		userRepository = postgres.NewUserRepository(db)
+	//Redis connection
+	cartRepo, err := redis.NewCartRepository(s.cfg.Redis.Addr, s.cfg.Redis.Password, s.cfg.Redis.DB)
+	if err != nil {
+		s.logger.Error("failed to connect to redis", slog.Any("error", err))
+		return Dependencies{}, err
 	}
-	cartRepository := redis.NewCartRepository()
-	_ = cartRepository // to avoid unused variable error for now
-	productRepository := postgres.NewProductRepository()
-	_ = productRepository // to avoid unused variable error for now
 
-	//public routes
-	cartService := service.NewCartService(cartRepository, productRepository)
-	_ = cartService // to avoid unused variable error for now
-	cartHandler := handler.NewCartHandler(cartService)
-	_ = cartHandler // to avoid unused variable error for now
-	orderRepository := postgres.NewOrderRepository()
-	_ = orderRepository // to avoid unused variable error for now
-	orderService := service.NewOrderService(orderRepository, cartRepository, productRepository)
-	_ = orderService // to avoid unused variable error for now
-	orderHandler := handler.NewOrderHandler(orderService)
-	_ = orderHandler // to avoid unused variable error for now
+	deps := Dependencies{
+		UserRepository:    postgres.NewUserRepository(db),
+		CartRepository:    cartRepo,
+		ProductRepository: postgres.NewProductRepository(db),
+		OrderRepository:   postgres.NewOrderRepository(db),
+	}
+	return deps, nil
+}
+
+func (s *Server) RegisterRoutes(deps Dependencies) {
 
 	s.app.Get("/health", handler.Health())
-
-	authService := service.NewAuthService(userRepository, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
-	authHandler := handler.NewAuthHandler(authService)
-	s.app.Post("/login", authHandler.Login)
 	s.app.Get("/swagger/*", swagger.HandlerDefault) // default swagger UI
 
-	//global middleware
-	s.app.Use(middleware.TimingMiddleware(s.logger))
-	s.app.Use(middleware.LoggingMiddleware(s.logger))
-
-	//products routes
-	productHandler := handler.NewProductHandler(service.NewProductService(postgres.NewProductRepository()))
+	productHandler := handler.NewProductHandler(service.NewProductService(deps.ProductRepository))
 	s.app.Get("/products", productHandler.List)
+
+	authService := service.NewAuthService(deps.UserRepository, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
+	authHandler := handler.NewAuthHandler(authService)
+	auth := s.app.Group("/auth")
+	auth.Post("/login", authHandler.Login)
 
 	//protected routes
 	protected := s.app.Group("/api")
 	protected.Use(middleware.JWTMiddleware(s.cfg.JWT.Secret))
+
+	cartService := service.NewCartService(deps.CartRepository, deps.ProductRepository)
+	cartHandler := handler.NewCartHandler(cartService)
+
+	orderService := service.NewOrderService(deps.OrderRepository, deps.CartRepository, deps.ProductRepository)
+	orderHandler := handler.NewOrderHandler(orderService)
+
 	protected.Post("/orders", orderHandler.CreateOrder)
 	protected.Post("/cart/add/:productId/:qty", cartHandler.AddToCart)
 	protected.Get("/cart", cartHandler.ViewCart)

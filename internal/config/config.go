@@ -38,9 +38,9 @@ type PostgresConfig struct {
 }
 
 type RedisConfig struct {
-	Host string `yaml:"host" env:"REDIS_HOST" env-default:"localhost"`
-	Port int    `yaml:"port" env:"REDIS_PORT" env-default:"6379"`
-	DB   int    `yaml:"db" env:"REDIS_DB" env-default:"0"`
+	Addr     string `yaml:"addr" env:"REDIS_ADDR" env-default:"localhost:6379"`
+	Password string `yaml:"password" env:"REDIS_PASSWORD" env-default:""`
+	DB       int    `yaml:"db" env:"REDIS_DB" env-default:"0"`
 }
 
 type JWTConfig struct {

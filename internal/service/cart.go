@@ -1,18 +1,16 @@
 package service
 
 import (
-	"paraklitshop/internal/repository/postgres"
-	"paraklitshop/internal/repository/redis"
-
 	"errors"
+	"paraklitshop/internal/repository"
 )
 
 type CartService struct {
-	cartRepo    *redis.CartRepository
-	productRepo *postgres.ProductRepository
+	cartRepo    repository.CartRepository
+	productRepo repository.ProductRepository
 }
 
-func NewCartService(cartRepo *redis.CartRepository, productRepo *postgres.ProductRepository) *CartService {
+func NewCartService(cartRepo repository.CartRepository, productRepo repository.ProductRepository) *CartService {
 	return &CartService{
 		cartRepo:    cartRepo,
 		productRepo: productRepo,
@@ -34,17 +32,17 @@ func (s *CartService) AddItem(userID, productID, qty int) error {
 	if !productExists {
 		return errors.New("product does not exist")
 	}
-	return s.cartRepo.AddItem(userID, productID, qty)
+	return s.cartRepo.Add(userID, productID, qty)
 }
 
 func (s *CartService) GetCart(userID int) (map[int]int, error) {
-	return s.cartRepo.GetCart(userID)
+	return s.cartRepo.Get(userID)
 }
 
 func (s *CartService) ClearCart(userID int) error {
-	return s.cartRepo.ClearCart(userID)
+	return s.cartRepo.Clear(userID)
 }
 
 func (s *CartService) RemoveItem(userID, productID int) error {
-	return s.cartRepo.RemoveItem(userID, productID)
+	return s.cartRepo.Remove(userID, productID)
 }

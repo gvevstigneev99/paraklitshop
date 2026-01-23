@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"paraklitshop/internal/config"
@@ -42,6 +43,16 @@ func main() {
 	// Создаем сервер
 	srv := server.NewServer(cfg, log)
 
+	// Настраиваем зависимости
+	deps, err := srv.SetupDependencies()
+	if err != nil {
+		log.Error("failed to setup dependencies", "error", err)
+		os.Exit(1)
+	}
+
+	// Регистрируем маршруты
+	srv.RegisterRoutes(deps)
+
 	// Запускаем сервер в отдельной горутине
 	go func() {
 		if err := srv.Start(); err != nil {
@@ -52,7 +63,7 @@ func main() {
 
 	// Ожидаем сигнал завершения
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Info("shutting down server...")
 

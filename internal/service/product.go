@@ -2,14 +2,14 @@ package service
 
 import (
 	"paraklitshop/internal/model"
-	"paraklitshop/internal/repository/postgres"
+	"paraklitshop/internal/repository"
 )
 
 type ProductService struct {
-	repo *postgres.ProductRepository
+	repo repository.ProductRepository
 }
 
-func NewProductService(repo *postgres.ProductRepository) *ProductService {
+func NewProductService(repo repository.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 

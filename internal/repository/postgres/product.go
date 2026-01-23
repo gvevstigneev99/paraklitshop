@@ -1,21 +1,30 @@
 package postgres
 
-import "paraklitshop/internal/model"
+import (
+	"paraklitshop/internal/model"
+	"paraklitshop/internal/repository"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type ProductRepository struct {
-	products []model.Product
+	db *sqlx.DB
 }
 
-func NewProductRepository() *ProductRepository {
-	return &ProductRepository{
-		products: []model.Product{
-			{ID: 1, Title: "Hoddie Paraklit", Description: "Description 1", Price: 4000.0, SellerID: 1},
-			{ID: 2, Title: "T-short Paraklit", Description: "Description 2", Price: 3000.0, SellerID: 2},
-			{ID: 3, Title: "Disk 1", Description: "Description 3", Price: 300.0, SellerID: 1},
-		},
-	}
+func NewProductRepository(db *sqlx.DB) repository.ProductRepository {
+	return &ProductRepository{db: db}
 }
 
 func (r *ProductRepository) GetAllProducts() ([]model.Product, error) {
-	return r.products, nil
+	const query = `
+		SELECT id, title, description, price, seller_id
+		FROM products
+		ORDER BY id
+	`
+	var products []model.Product
+	err := r.db.Select(&products, query)
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
 }

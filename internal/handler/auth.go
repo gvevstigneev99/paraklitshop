@@ -20,11 +20,11 @@ func NewAuthHandler(s service.AuthService) *AuthHandler {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param input body LoginRequest true "Login credentials"
+// @Param loginRequest body object{username=string,password=string} true "Login Request"
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /login [post]
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req struct {
 		Username string `json:"username"`

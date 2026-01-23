@@ -5,15 +5,6 @@ definitions:
       error:
         type: string
     type: object
-  handler.LoginRequest:
-    properties:
-      password:
-        example: buyer123
-        type: string
-      username:
-        example: buyer@test.com
-        type: string
-    type: object
   handler.LoginResponse:
     properties:
       token:
@@ -50,9 +41,46 @@ paths:
             type: object
       security:
       - BearerAuth: []
+      - BearerAuth: []
       summary: Create a new order
       tags:
       - orders
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные пользователя и возвращает JWT токен при
+        успешной аутентификации.
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          properties:
+            password:
+              type: string
+            username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Авторизация пользователя
+      tags:
+      - auth
   /cart:
     get:
       consumes:
@@ -61,6 +89,8 @@ paths:
       produces:
       - application/json
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Просмотр корзины
       tags:
       - cart
@@ -83,6 +113,8 @@ paths:
       produces:
       - application/json
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Добавить товар в корзину
       tags:
       - cart
@@ -94,6 +126,8 @@ paths:
       produces:
       - application/json
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Очистить корзину
       tags:
       - cart
@@ -111,6 +145,8 @@ paths:
       produces:
       - application/json
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Удалить товар из корзины
       tags:
       - cart
@@ -131,36 +167,6 @@ paths:
       summary: Проверка состояния сервиса
       tags:
       - health
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Выполняет аутентификацию пользователя и возвращает JWT токен
-      parameters:
-      - description: Login credentials
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/handler.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.LoginResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: Авторизация пользователя
-      tags:
-      - auth
   /products:
     get:
       consumes:
